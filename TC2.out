@@ -1,0 +1,58 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM students WHERE age > 20
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+
+Estimated Cost: 0
+Resulting Tuple Size: 100
+Best Algorithm Selected: SCAN
+
+--- EXECUTION ENGINE RESULTS ---
+students.age	students.id	students.name	
+21	3	Student3	
+22	4	Student4	
+21	8	Student8	
+22	9	Student9	
+21	13	Student13	
+22	14	Student14	
+21	18	Student18	
+22	19	Student19	
+21	23	Student23	
+22	24	Student24	
+21	28	Student28	
+22	29	Student29	
+21	33	Student33	
+22	34	Student34	
+21	38	Student38	
+22	39	Student39	
+21	43	Student43	
+22	44	Student44	
+21	48	Student48	
+22	49	Student49	
+21	53	Student53	
+22	54	Student54	
+21	58	Student58	
+22	59	Student59	
+21	63	Student63	
+22	64	Student64	
+21	68	Student68	
+22	69	Student69	
+21	73	Student73	
+22	74	Student74	
+21	78	Student78	
+22	79	Student79	
+21	83	Student83	
+22	84	Student84	
+21	88	Student88	
+22	89	Student89	
+21	93	Student93	
+22	94	Student94	
+21	98	Student98	
+22	99	Student99	
+40 row(s) returned.
+-------------------------------

@@ -1,0 +1,118 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM enrollments
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+
+Estimated Cost: 0
+Resulting Tuple Size: 100
+Best Algorithm Selected: SCAN
+
+--- EXECUTION ENGINE RESULTS ---
+enrollments.course_id	enrollments.semester	enrollments.student_id	
+CS1	Fall2024	2	
+CS2	Fall2024	3	
+CS3	Fall2024	4	
+CS4	Fall2024	5	
+CS5	Fall2024	6	
+CS6	Fall2024	7	
+CS7	Fall2024	8	
+CS8	Fall2024	9	
+CS9	Fall2024	10	
+CS0	Fall2024	11	
+CS1	Fall2024	12	
+CS2	Fall2024	13	
+CS3	Fall2024	14	
+CS4	Fall2024	15	
+CS5	Fall2024	16	
+CS6	Fall2024	17	
+CS7	Fall2024	18	
+CS8	Fall2024	19	
+CS9	Fall2024	20	
+CS0	Fall2024	21	
+CS1	Fall2024	22	
+CS2	Fall2024	23	
+CS3	Fall2024	24	
+CS4	Fall2024	25	
+CS5	Fall2024	26	
+CS6	Fall2024	27	
+CS7	Fall2024	28	
+CS8	Fall2024	29	
+CS9	Fall2024	30	
+CS0	Fall2024	31	
+CS1	Fall2024	32	
+CS2	Fall2024	33	
+CS3	Fall2024	34	
+CS4	Fall2024	35	
+CS5	Fall2024	36	
+CS6	Fall2024	37	
+CS7	Fall2024	38	
+CS8	Fall2024	39	
+CS9	Fall2024	40	
+CS0	Fall2024	41	
+CS1	Fall2024	42	
+CS2	Fall2024	43	
+CS3	Fall2024	44	
+CS4	Fall2024	45	
+CS5	Fall2024	46	
+CS6	Fall2024	47	
+CS7	Fall2024	48	
+CS8	Fall2024	49	
+CS9	Fall2024	50	
+CS0	Fall2024	51	
+CS1	Fall2024	52	
+CS2	Fall2024	53	
+CS3	Fall2024	54	
+CS4	Fall2024	55	
+CS5	Fall2024	56	
+CS6	Fall2024	57	
+CS7	Fall2024	58	
+CS8	Fall2024	59	
+CS9	Fall2024	60	
+CS0	Fall2024	61	
+CS1	Fall2024	62	
+CS2	Fall2024	63	
+CS3	Fall2024	64	
+CS4	Fall2024	65	
+CS5	Fall2024	66	
+CS6	Fall2024	67	
+CS7	Fall2024	68	
+CS8	Fall2024	69	
+CS9	Fall2024	70	
+CS0	Fall2024	71	
+CS1	Fall2024	72	
+CS2	Fall2024	73	
+CS3	Fall2024	74	
+CS4	Fall2024	75	
+CS5	Fall2024	76	
+CS6	Fall2024	77	
+CS7	Fall2024	78	
+CS8	Fall2024	79	
+CS9	Fall2024	80	
+CS0	Fall2024	81	
+CS1	Fall2024	82	
+CS2	Fall2024	83	
+CS3	Fall2024	84	
+CS4	Fall2024	85	
+CS5	Fall2024	86	
+CS6	Fall2024	87	
+CS7	Fall2024	88	
+CS8	Fall2024	89	
+CS9	Fall2024	90	
+CS0	Fall2024	91	
+CS1	Fall2024	92	
+CS2	Fall2024	93	
+CS3	Fall2024	94	
+CS4	Fall2024	95	
+CS5	Fall2024	96	
+CS6	Fall2024	97	
+CS7	Fall2024	98	
+CS8	Fall2024	99	
+CS9	Fall2024	100	
+CS0	Fall2024	1	
+100 row(s) returned.
+-------------------------------

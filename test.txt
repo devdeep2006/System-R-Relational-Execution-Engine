@@ -1,0 +1,25 @@
+# Simple SELECT Operations (No Joins)
+students|SELECT * FROM students
+grades|SELECT * FROM grades
+enrollments|SELECT * FROM enrollments
+TC1|SELECT * FROM students WHERE id=5
+TC2|SELECT * FROM students WHERE age > 20
+TC3|SELECT * FROM courses
+TC4|SELECT * FROM courses WHERE id = CS2
+
+# Selection Push-Down (Single Join)
+TC5|SELECT * FROM students JOIN grades ON students.id = grades.student_id WHERE students.age = 18
+
+# Joins
+TC6|SELECT * FROM students JOIN enrollments ON students.id = enrollments.student_id
+TC7|SELECT * FROM students JOIN enrollments ON students.id = enrollments.student_id JOIN courses ON enrollments.course_id = courses.id
+TC8|SELECT * FROM students JOIN grades ON students.id = grades.student_id JOIN enrollments ON students.id = enrollments.student_id JOIN courses ON enrollments.course_id = courses.id WHERE students.age > 18
+# BNLJ will still win here (tiny tables)
+TC9_Tiny|SELECT * FROM students JOIN grades ON students.id = grades.student_id
+
+# Hash Join should crush BNLJ here. 
+# BNLJ would require ~42 runs, reading the 5,000 block table 42 times!
+TC10_Massive|SELECT * FROM huge_users JOIN huge_transactions ON huge_users.id = huge_transactions.user_id
+
+# Merge Join should win here if you hardcoded the Catalog to say these columns are pre-sorted
+TC11_Sorted|SELECT * FROM huge_users JOIN huge_transactions ON huge_users.id = huge_transactions.user_id

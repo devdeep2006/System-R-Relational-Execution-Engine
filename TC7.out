@@ -1,0 +1,21 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM students JOIN enrollments ON students.id = enrollments.student_id JOIN courses ON enrollments.course_id = courses.id
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+  Join 1: [enrollments] X [courses] ON enrollments.course_id = courses.id (BNLJ)
+  Join 2: [enrollments,courses] X [students] ON enrollments.student_id = students.id (BNLJ)
+
+Estimated Cost: 40.4
+Resulting Tuple Size: 100
+Best Algorithm Selected: BNLJ
+
+--- EXECUTION ENGINE RESULTS ---
+courses.id	courses.title	enrollments.course_id	enrollments.semester	enrollments.student_id	students.age	students.id	students.name	
+CS1	Course1	CS1	Fall2024	2	20	2	Student2	
+1 row(s) returned.
+-------------------------------

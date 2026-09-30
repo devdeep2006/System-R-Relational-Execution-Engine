@@ -1,0 +1,26 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM students JOIN grades ON students.id = grades.student_id JOIN enrollments ON students.id = enrollments.student_id JOIN courses ON enrollments.course_id = courses.id WHERE students.age > 18
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+  Join 1: [enrollments] X [courses] ON enrollments.course_id = courses.id (BNLJ)
+  Join 2: [enrollments,courses] X [students] ON enrollments.student_id = students.id (BNLJ)
+  Join 3: [enrollments,courses,students] X [grades] ON students.id = grades.student_id (BNLJ)
+
+Estimated Cost: 61
+Resulting Tuple Size: 500
+Best Algorithm Selected: BNLJ
+
+--- EXECUTION ENGINE RESULTS ---
+courses.id	courses.title	enrollments.course_id	enrollments.semester	enrollments.student_id	grades.course	grades.grade	grades.student_id	students.age	students.id	students.name	
+CS1	Course1	CS1	Fall2024	2	CS1	61	2	20	2	Student2	
+CS1	Course1	CS1	Fall2024	2	CS1	79	2	20	2	Student2	
+CS1	Course1	CS1	Fall2024	2	CS1	97	2	20	2	Student2	
+CS1	Course1	CS1	Fall2024	2	CS1	74	2	20	2	Student2	
+CS1	Course1	CS1	Fall2024	2	CS1	92	2	20	2	Student2	
+5 row(s) returned.
+-------------------------------

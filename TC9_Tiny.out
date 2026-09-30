@@ -1,0 +1,20 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM students JOIN grades ON students.id = grades.student_id
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+  Join 1: [grades] X [students] ON grades.student_id = students.id (BNLJ)
+
+Estimated Cost: 20.6
+Resulting Tuple Size: 500
+Best Algorithm Selected: BNLJ
+
+--- EXECUTION ENGINE RESULTS ---
+grades.course	grades.grade	grades.student_id	students.age	students.id	students.name	
+CS1	61	2	20	2	Student2	
+1 row(s) returned.
+-------------------------------

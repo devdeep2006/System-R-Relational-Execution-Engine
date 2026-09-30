@@ -1,0 +1,118 @@
+
+==================================================================
+TEST QUERY: SELECT * FROM students
+------------------------------------------------------------------
+Optimizer is processing heuristics and DP...
+
+OPTIMAL PHYSICAL PLAN (Tree):
+
+JOIN SEQUENCE (Order of Operations):
+
+Estimated Cost: 0
+Resulting Tuple Size: 100
+Best Algorithm Selected: SCAN
+
+--- EXECUTION ENGINE RESULTS ---
+students.age	students.id	students.name	
+19	1	Student1	
+20	2	Student2	
+21	3	Student3	
+22	4	Student4	
+18	5	Student5	
+19	6	Student6	
+20	7	Student7	
+21	8	Student8	
+22	9	Student9	
+18	10	Student10	
+19	11	Student11	
+20	12	Student12	
+21	13	Student13	
+22	14	Student14	
+18	15	Student15	
+19	16	Student16	
+20	17	Student17	
+21	18	Student18	
+22	19	Student19	
+18	20	Student20	
+19	21	Student21	
+20	22	Student22	
+21	23	Student23	
+22	24	Student24	
+18	25	Student25	
+19	26	Student26	
+20	27	Student27	
+21	28	Student28	
+22	29	Student29	
+18	30	Student30	
+19	31	Student31	
+20	32	Student32	
+21	33	Student33	
+22	34	Student34	
+18	35	Student35	
+19	36	Student36	
+20	37	Student37	
+21	38	Student38	
+22	39	Student39	
+18	40	Student40	
+19	41	Student41	
+20	42	Student42	
+21	43	Student43	
+22	44	Student44	
+18	45	Student45	
+19	46	Student46	
+20	47	Student47	
+21	48	Student48	
+22	49	Student49	
+18	50	Student50	
+19	51	Student51	
+20	52	Student52	
+21	53	Student53	
+22	54	Student54	
+18	55	Student55	
+19	56	Student56	
+20	57	Student57	
+21	58	Student58	
+22	59	Student59	
+18	60	Student60	
+19	61	Student61	
+20	62	Student62	
+21	63	Student63	
+22	64	Student64	
+18	65	Student65	
+19	66	Student66	
+20	67	Student67	
+21	68	Student68	
+22	69	Student69	
+18	70	Student70	
+19	71	Student71	
+20	72	Student72	
+21	73	Student73	
+22	74	Student74	
+18	75	Student75	
+19	76	Student76	
+20	77	Student77	
+21	78	Student78	
+22	79	Student79	
+18	80	Student80	
+19	81	Student81	
+20	82	Student82	
+21	83	Student83	
+22	84	Student84	
+18	85	Student85	
+19	86	Student86	
+20	87	Student87	
+21	88	Student88	
+22	89	Student89	
+18	90	Student90	
+19	91	Student91	
+20	92	Student92	
+21	93	Student93	
+22	94	Student94	
+18	95	Student95	
+19	96	Student96	
+20	97	Student97	
+21	98	Student98	
+22	99	Student99	
+18	100	Student100	
+100 row(s) returned.
+-------------------------------
