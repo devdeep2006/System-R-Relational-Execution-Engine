@@ -1,0 +1,139 @@
+
+sysr> EXPLAIN ANALYZE SELECT u.region, t.amount
+FROM huge_users u JOIN huge_transactions t ON u.id = t.user_id;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 23 plans costed, 4 kept | planning 0.060 ms
+-> Project u.region, t.amount  (rows=491463 cost=9021ms actual=500000)
+   -> BlockNestedLoopJoin  on t.user_id = u.id (hashed blocks)  (rows=491463 cost=8923ms actual=500000; inner spilled (633 pages), 48 outer blocks)
+      -> SeqScan huge_transactions AS t  (rows=500000 cost=513ms actual=500000)
+      -> SeqScan huge_users AS u  [sorted: u.id]  (rows=100000 cost=93.30ms actual=100000)
+Estimated I/O: 35830 transfers, 416 seeks  -> 7743.00 ms
+Measured  I/O: 35683 transfers (35050 reads, 633 writes), 384 seeks  -> 7408.30 ms
+Buffer pool: 0 hits, 4666 misses, 4410 evictions
+Execution: 500000 rows in 756.00 ms
+
+sysr> EXPLAIN ANALYZE SELECT u.id, t.amount
+FROM huge_users u JOIN huge_transactions t ON u.id = t.user_id
+ORDER BY u.id;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 23 plans costed, 5 kept | planning 0.041 ms
+-> Project u.id, t.amount  (rows=491463 cost=26571ms actual=500000)
+   -> MergeJoin  on t.user_id = u.id  [sorted: u.id]  (rows=491463 cost=26473ms actual=500000)
+      -> Sort by t.user_id (external, 2 merge passes)  (rows=500000 cost=26260ms actual=500000; external: 46 runs, 2 merge passes)
+         -> SeqScan huge_transactions AS t  (rows=500000 cost=513ms actual=500000)
+      -> SeqScan huge_users AS u  [sorted: u.id]  (rows=100000 cost=93.30ms actual=100000)
+Estimated I/O: 16398 transfers, 2250 seeks  -> 24139.80 ms
+Measured  I/O: 16506 transfers (10586 reads, 5920 writes), 2690 seeks  -> 28550.60 ms
+Buffer pool: 0 hits, 4666 misses, 4410 evictions
+Execution: 500000 rows in 285.97 ms
+
+sysr> SET interesting_orders = off;
+SET interesting_orders = off
+
+sysr> EXPLAIN SELECT u.id, t.amount
+FROM huge_users u JOIN huge_transactions t ON u.id = t.user_id
+ORDER BY u.id;
+Optimizer: left-deep DP, interesting orders off, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 12 plans costed, 3 kept | planning 0.036 ms
+-> Project u.id, t.amount  (rows=491463 cost=40354ms)
+   -> Sort by u.id (external, 2 merge passes)  (rows=491463 cost=40255ms)
+      -> BlockNestedLoopJoin  on t.user_id = u.id (hashed blocks)  (rows=491463 cost=6265ms)
+         -> SeqScan huge_transactions AS t  (rows=500000 cost=513ms)
+         -> SeqScan huge_users AS u  (rows=100000 cost=93.30ms)
+
+sysr> SET interesting_orders = on;
+SET interesting_orders = on
+
+sysr> EXPLAIN ANALYZE SELECT * FROM huge_users WHERE id BETWEEN 5000 AND 5100;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 1 relation sets, 0 splits, 2 plans costed, 1 kept | planning 0.007 ms
+-> Project huge_users.id, huge_users.region  (rows=101 cost=40.46ms actual=101)
+   -> IndexScan huge_users using huge_users_id_idx range [5000, 5100] clustered  (rows=101 cost=40.44ms actual=101)
+Estimated I/O: 4 transfers, 4 seeks  -> 40.40 ms
+Measured  I/O: 5 transfers (5 reads, 0 writes), 4 seeks  -> 40.50 ms
+Buffer pool: 100 hits, 5 misses, 0 evictions
+Execution: 101 rows in 0.03 ms
+
+sysr> EXPLAIN ANALYZE SELECT u.id, t.tx_id, t.amount
+FROM huge_users u JOIN huge_transactions t ON u.id = t.user_id
+WHERE u.id BETWEEN 100 AND 103;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 23 plans costed, 4 kept | planning 0.021 ms
+-> Project u.id, t.tx_id, t.amount  (rows=20.24 cost=80.82ms actual=20)
+   -> MergeJoin  on t.user_id = u.id  (rows=20.24 cost=80.81ms actual=20)
+      -> IndexScan huge_transactions AS t using huge_transactions_user_id_idx range [100, 103] clustered  [sorted: t.user_id]  (rows=20.76 cost=40.41ms actual=20)
+      -> IndexScan huge_users AS u using huge_users_id_idx range [100, 103] clustered  [sorted: u.id]  (rows=3.97 cost=40.40ms actual=4)
+Estimated I/O: 8 transfers, 8 seeks  -> 80.80 ms
+Measured  I/O: 12 transfers (12 reads, 0 writes), 12 seeks  -> 121.20 ms
+Buffer pool: 20 hits, 12 misses, 0 evictions
+Execution: 20 rows in 0.01 ms
+
+sysr> EXPLAIN ANALYZE SELECT c.c_id, u.region, t.tx_id, t.amount
+FROM customers c JOIN huge_users u ON c.c_id = u.id JOIN huge_transactions t ON u.id = t.user_id
+WHERE c.signup_day = 17 AND c.tier = 4;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 7 relation sets, 9 splits, 92 plans costed, 11 kept | planning 0.051 ms
+-> Project c.c_id, u.region, t.tx_id, t.amount  (rows=4.91 cost=122ms actual=5)
+   -> IndexNestedLoopJoin inner=huge_transactions AS t using huge_transactions_user_id_idx  on c.c_id = t.user_id  (rows=4.91 cost=122ms actual=5; 1 index probes)
+      -> IndexNestedLoopJoin inner=huge_users AS u using huge_users_id_idx  on c.c_id = u.id  [sorted: c.c_id]  (rows=1 cost=52.39ms actual=1; 1 index probes)
+         -> SeqScan customers AS c  filter: c.signup_day = 17 AND c.tier = 4  [sorted: c.c_id]  (rows=1 cost=22.20ms actual=1)
+Estimated I/O: 110 transfers, 11 seeks  -> 120.11 ms
+Measured  I/O: 114 transfers (114 reads, 0 writes), 14 seeks  -> 151.40 ms
+Buffer pool: 2 hits, 114 misses, 0 evictions
+Execution: 5 rows in 1.23 ms
+
+sysr> SET enable_indexnlj = off;
+SET enable_indexnlj = off
+
+sysr> EXPLAIN ANALYZE SELECT c.c_id, u.region, t.tx_id, t.amount
+FROM customers c JOIN huge_users u ON c.c_id = u.id JOIN huge_transactions t ON u.id = t.user_id
+WHERE c.signup_day = 17 AND c.tier = 4;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 7 relation sets, 9 splits, 78 plans costed, 11 kept | planning 0.040 ms
+-> Project c.c_id, u.region, t.tx_id, t.amount  (rows=4.91 cost=749ms actual=5)
+   -> HashJoin build=left in-memory  on c.c_id = t.user_id  (rows=4.91 cost=749ms actual=5; in-memory hash table)
+      -> MergeJoin  on u.id = c.c_id  [sorted: c.c_id]  (rows=1 cost=136ms actual=1)
+         -> SeqScan huge_users AS u  [sorted: u.id]  (rows=100000 cost=93.30ms actual=460)
+         -> SeqScan customers AS c  filter: c.signup_day = 17 AND c.tier = 4  [sorted: c.c_id]  (rows=1 cost=22.20ms actual=1)
+      -> SeqScan huge_transactions AS t  (rows=500000 cost=513ms actual=500000)
+Estimated I/O: 4768 transfers, 3 seeks  -> 506.80 ms
+Measured  I/O: 4138 transfers (4138 reads, 0 writes), 5 seeks  -> 463.80 ms
+Buffer pool: 0 hits, 4138 misses, 3882 evictions
+Execution: 5 rows in 50.58 ms
+
+sysr> SET enable_indexnlj = on;
+SET enable_indexnlj = on
+
+sysr> EXPLAIN ANALYZE SELECT COUNT(*) FROM orders WHERE status = 'DELIVERED';
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 1 relation sets, 0 splits, 1 plans costed, 1 kept | planning 0.022 ms
+-> Project count(*)  (rows=1 cost=370ms actual=1)
+   -> HashAggregate  aggs: count(*)  (rows=1 cost=370ms actual=1; 1 groups)
+      -> SeqScan orders  filter: orders.status = 'DELIVERED'  (rows=140000 cost=314ms actual=140000)
+Estimated I/O: 2638 transfers, 1 seeks  -> 273.80 ms
+Measured  I/O: 2638 transfers (2638 reads, 0 writes), 1 seeks  -> 273.80 ms
+Buffer pool: 0 hits, 2638 misses, 2382 evictions
+Execution: 1 rows in 23.07 ms
+
+sysr> EXPLAIN ANALYZE SELECT COUNT(*) FROM orders WHERE day > 300;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 1 relation sets, 0 splits, 1 plans costed, 1 kept | planning 0.010 ms
+-> Project count(*)  (rows=1 cost=348ms actual=1)
+   -> HashAggregate  aggs: count(*)  (rows=1 cost=348ms actual=1; 1 groups)
+      -> SeqScan orders  filter: orders.day > 300  (rows=84866 cost=314ms actual=84845)
+Estimated I/O: 2638 transfers, 1 seeks  -> 273.80 ms
+Measured  I/O: 2638 transfers (2638 reads, 0 writes), 1 seeks  -> 273.80 ms
+Buffer pool: 0 hits, 2638 misses, 2382 evictions
+Execution: 1 rows in 23.19 ms
+
+sysr> SELECT customer_id, COUNT(*) AS n, SUM(amount) AS revenue
+FROM orders GROUP BY customer_id ORDER BY n DESC LIMIT 5;
++-------------+-------+------------+
+| customer_id | n     | revenue    |
++-------------+-------+------------+
+| 1           | 29883 | 1657286.66 |
+| 2           | 14073 | 756966.07  |
+| 3           | 9068  | 487358.46  |
+| 4           | 6614  | 368410.17  |
+| 5           | 5260  | 284668.46  |
++-------------+-------+------------+
+5 rows  [plan 0.01 ms, exec 40.41 ms, I/O 2638 transfers / 1 seeks]
+
+sysr> EXPLAIN SELECT c.region, o.amount FROM customers c JOIN orders o ON c.c_id = o.customer_id
+WHERE o.customer_id = 42;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 23 plans costed, 4 kept | planning 0.029 ms
+-> Project c.region, o.amount  (rows=10.72 cost=161ms)
+   -> MergeJoin  on o.customer_id = c.c_id  (rows=10.72 cost=161ms)
+      -> IndexScan orders AS o using orders_customer_id_idx range [42, 42] unclustered  [sorted: o.customer_id]  (rows=10.72 cost=139ms)
+      -> SeqScan customers AS c  filter: c.c_id = 42  [sorted: c.c_id]  (rows=1 cost=22.20ms)

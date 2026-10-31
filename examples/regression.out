@@ -1,0 +1,122 @@
+
+sysr> SELECT * FROM students WHERE id = 5;
++-------------+---------------+--------------+
+| students.id | students.name | students.age |
++-------------+---------------+--------------+
+| 5           | Student5      | 18           |
++-------------+---------------+--------------+
+1 row  [plan 0.04 ms, exec 0.02 ms, I/O 0 transfers / 0 seeks]
+
+sysr> SELECT * FROM students WHERE age > 20 ORDER BY id LIMIT 5;
++-------------+---------------+--------------+
+| students.id | students.name | students.age |
++-------------+---------------+--------------+
+| 3           | Student3      | 21           |
+| 4           | Student4      | 22           |
+| 8           | Student8      | 21           |
+| 9           | Student9      | 22           |
+| 13          | Student13     | 21           |
++-------------+---------------+--------------+
+5 rows  [plan 0.01 ms, exec 0.01 ms, I/O 0 transfers / 0 seeks]
+
+sysr> SELECT * FROM courses;
++------------+---------------+
+| courses.id | courses.title |
++------------+---------------+
+| CS1        | Course1       |
+| CS2        | Course2       |
+| CS3        | Course3       |
+| CS4        | Course4       |
+| CS5        | Course5       |
+| CS6        | Course6       |
+| CS7        | Course7       |
+| CS8        | Course8       |
+| CS9        | Course9       |
+| CS10       | Course10      |
++------------+---------------+
+10 rows  [plan 0.00 ms, exec 0.00 ms, I/O 1 transfers / 1 seeks]
+
+sysr> SELECT * FROM courses WHERE id = 'CS2';
++------------+---------------+
+| courses.id | courses.title |
++------------+---------------+
+| CS2        | Course2       |
++------------+---------------+
+1 row  [plan 0.00 ms, exec 0.00 ms, I/O 0 transfers / 0 seeks]
+
+sysr> EXPLAIN SELECT * FROM students JOIN grades ON students.id = grades.student_id WHERE students.age = 18;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 3 relation sets, 2 splits, 12 plans costed, 3 kept | planning 0.024 ms
+-> Project students.id, students.name, students.age, grades.student_id, grades.course, grades.grade  (rows=103 cost=20.74ms)
+   -> BlockNestedLoopJoin  on grades.student_id = students.id (hashed blocks)  (rows=103 cost=20.72ms)
+      -> SeqScan grades  (rows=500 cost=10.50ms)
+      -> SeqScan students  filter: students.age = 18  [sorted: students.id]  (rows=20 cost=10.12ms)
+
+sysr> SELECT COUNT(*) FROM students JOIN grades ON students.id = grades.student_id WHERE students.age = 18;
++----------+
+| count(*) |
++----------+
+| 100      |
++----------+
+1 row  [plan 0.01 ms, exec 0.10 ms, I/O 4 transfers / 1 seeks]
+
+sysr> SELECT COUNT(*) FROM students JOIN enrollments ON students.id = enrollments.student_id;
++----------+
+| count(*) |
++----------+
+| 100      |
++----------+
+1 row  [plan 0.01 ms, exec 0.05 ms, I/O 1 transfers / 0 seeks]
+
+sysr> EXPLAIN SELECT s.name, c.title
+FROM students s JOIN enrollments e ON s.id = e.student_id JOIN courses c ON e.course_id = c.id;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 6 relation sets, 6 splits, 30 plans costed, 6 kept | planning 0.022 ms
+-> Project s.name, c.title  (rows=103 cost=30.42ms)
+   -> BlockNestedLoopJoin  on e.student_id = s.id (hashed blocks)  (rows=103 cost=30.40ms)
+      -> BlockNestedLoopJoin  on c.id = e.course_id (hashed blocks)  (rows=100 cost=20.24ms)
+         -> SeqScan courses AS c  (rows=10 cost=10.10ms)
+         -> SeqScan enrollments AS e  (rows=100 cost=10.12ms)
+      -> SeqScan students AS s  [sorted: s.id]  (rows=100 cost=10.12ms)
+
+sysr> EXPLAIN ANALYZE SELECT *
+FROM students JOIN grades ON students.id = grades.student_id
+              JOIN enrollments ON students.id = enrollments.student_id
+              JOIN courses ON enrollments.course_id = courses.id
+WHERE students.age > 18;
+Optimizer: left-deep DP, interesting orders on, estimator=histogram, M=64 pages | 12 relation sets, 18 splits, 112 plans costed, 17 kept | planning 0.060 ms
+-> Project students.id, students.name, students.age, grades.student_id, grades.course, grades.grade, enrollments.student_id, enrollments.course_id, enrollments.semester, courses.id, courses.title  (rows=425 cost=41.10ms actual=350)
+   -> BlockNestedLoopJoin  on students.id = grades.student_id (hashed blocks)  (rows=425 cost=41.01ms actual=350; inner held in memory)
+      -> BlockNestedLoopJoin  on enrollments.course_id = courses.id (hashed blocks)  (rows=82.47 cost=30.40ms actual=70; inner held in memory)
+         -> BlockNestedLoopJoin  on enrollments.student_id = students.id (hashed blocks)  (rows=82.47 cost=20.28ms actual=80; inner held in memory)
+            -> SeqScan enrollments  (rows=100 cost=10.12ms actual=100)
+            -> SeqScan students  filter: students.age > 18  [sorted: students.id]  (rows=80 cost=10.12ms actual=80)
+         -> SeqScan courses  (rows=10 cost=10.10ms actual=10)
+      -> SeqScan grades  (rows=500 cost=10.50ms actual=500)
+Estimated I/O: 7 transfers, 4 seeks  -> 40.70 ms
+Measured  I/O: 7 transfers (7 reads, 0 writes), 4 seeks  -> 40.70 ms
+Buffer pool: 0 hits, 7 misses, 0 evictions
+Execution: 350 rows in 0.30 ms
+
+sysr> SELECT COUNT(*) FROM students JOIN grades ON students.id = grades.student_id
+                             JOIN enrollments ON students.id = enrollments.student_id
+                             JOIN courses ON enrollments.course_id = courses.id
+WHERE students.age > 18;
++----------+
+| count(*) |
++----------+
+| 350      |
++----------+
+1 row  [plan 0.06 ms, exec 0.35 ms, I/O 0 transfers / 0 seeks]
+
+sysr> SELECT s.age, COUNT(*) AS n, AVG(g.grade) AS avg_grade, MAX(g.grade) AS best
+FROM students s JOIN grades g ON s.id = g.student_id
+GROUP BY s.age ORDER BY s.age;
++-------+-----+-----------+------+
+| s.age | n   | avg_grade | best |
++-------+-----+-----------+------+
+| 18    | 100 | 79.85     | 100  |
+| 19    | 100 | 80.03     | 100  |
+| 20    | 100 | 79.72     | 100  |
+| 21    | 100 | 79.49     | 100  |
+| 22    | 100 | 79.67     | 100  |
++-------+-----+-----------+------+
+5 rows  [plan 0.02 ms, exec 0.14 ms, I/O 0 transfers / 0 seeks]
